@@ -16,14 +16,13 @@ create-zip-dir:
 
 # Package individual functions
 package-discord-identity: create-zip-dir
-    cd dist && zip -r zip/discord-identity.zip discord-identity/index.js*
+    cd dist/discord-identity && zip -r ../zip/discord-identity.zip index.js*
 
 package-auth-login: create-zip-dir
-    cd dist && zip -r zip/auth-login.zip auth-login/index.js*
+    cd dist/auth-login && zip -r ../zip/auth-login.zip index.js*
 
 package-auth-callback: create-zip-dir
-    cd dist && zip -r zip/auth-callback.zip auth-callback/index.js*
-
+    cd dist/auth-callback && zip -r ../zip/auth-callback.zip index.js*
 # Package all functions
 package: build
     just package-discord-identity
