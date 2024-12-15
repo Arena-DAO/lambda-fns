@@ -1,0 +1,7 @@
+{
+  "name": "discord-identity",
+  "packageManager": "yarn@4.5.3",
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.32.4"
+  }
+}

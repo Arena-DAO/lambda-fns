@@ -1,13 +1,26 @@
 {
-  "name": "lambdas",
+  "name": "arena-lambdas",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "keywords": [],
   "author": "",
   "license": "GPL-3.0-only",
-  "description": "",
-  "dependencies": {
-    "@cosmjs/proto-signing": "^0.32.4",
-    "@cosmjs/stargate": "^0.32.4"
+  "description": "Lambda functions to integrate Discord into the Arena DAO",
+  "packageManager": "yarn@4.5.3",
+  "workspaces": [
+    "src/*"
+  ],
+  "scripts": {
+    "build": "ts-node build.ts"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.146",
+    "@types/jsonwebtoken": "^9",
+    "@types/node": "^22.10.2",
+    "aws-sdk": "^2.1692.0",
+    "esbuild": "^0.24.0",
+    "esbuild-node-externals": "^1.15.0",
+    "serverless": "4.4.16",
+    "typescript": "^5.7.2"
   }
 }
