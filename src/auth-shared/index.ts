@@ -1,13 +1,13 @@
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { APIGatewayProxyEvent } from "aws-lambda";
 import axios from "axios";
 
 const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || "AuthTokensTable";
 const REGION = process.env.AWS_REGION || "us-east-1";
-const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
-const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
-const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
 const DISCORD_API_URL = "https://discord.com/api";
+export const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
+export const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
+export const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
+export const REDIRECT_URI = "https://api.arenadao.org/callback";
 
 const dynamoDbClient = new DynamoDBClient({ region: REGION });
 
@@ -144,12 +144,6 @@ export const getDiscordIdFromToken = async (token: string): Promise<string> => {
         console.error("Error fetching Discord ID:", error.response?.data || error.message);
         throw new Error("Failed to fetch Discord ID from the API.");
     }
-};
-
-export const getCallbackUrl = (event: APIGatewayProxyEvent): string => {
-    const domain = event.requestContext.domainName;
-    const stage = event.requestContext.stage;
-    return `https://${domain}/${stage}/callback`;
 };
 
 

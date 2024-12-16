@@ -1,8 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { getCallbackUrl } from "src/auth-shared";
+import { OAUTH2_CLIENT_ID, REDIRECT_URI } from "src/auth-shared";
 
 const OAUTH2_AUTHORIZE_URL = process.env.OAUTH2_AUTHORIZE_URL || "https://discord.com/oauth2/authorize";
-const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 const OAUTH2_SCOPES = process.env.SCOPES!;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -24,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         // Construct the authorization URL
         const authUrl = new URL(OAUTH2_AUTHORIZE_URL);
         authUrl.searchParams.append("client_id", OAUTH2_CLIENT_ID);
-        authUrl.searchParams.append("redirect_uri", getCallbackUrl(event));
+        authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
         authUrl.searchParams.append("response_type", "code");
         authUrl.searchParams.append("scope", OAUTH2_SCOPES);
         authUrl.searchParams.append("state", state);

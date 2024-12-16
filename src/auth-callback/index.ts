@@ -1,10 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { getCallbackUrl, getDiscordIdFromToken, updateTokenData } from "src/auth-shared";
+import { getDiscordIdFromToken, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, REDIRECT_URI, updateTokenData } from "src/auth-shared";
 
 const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
-const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
-const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -29,7 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             new URLSearchParams({
                 grant_type: "authorization_code",
                 code,
-                redirect_uri: getCallbackUrl(event),
+                redirect_uri: REDIRECT_URI,
                 client_id: OAUTH2_CLIENT_ID,
                 client_secret: OAUTH2_CLIENT_SECRET,
             }).toString(),
