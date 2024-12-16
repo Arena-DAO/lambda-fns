@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
-const OAUTH2_AUTHORIZE_URL = process.env.OAUTH2_AUTHORIZE_URL!;
+const OAUTH2_AUTHORIZE_URL = process.env.OAUTH2_AUTHORIZE_URL || "https://discord.com/oauth2/authorize";
 const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 const OAUTH2_SCOPES = process.env.SCOPES!;
 const ALLOWED_REDIRECT_URIS = (process.env.ALLOWED_REDIRECT_URIS || "").split(",");

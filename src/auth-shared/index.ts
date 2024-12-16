@@ -1,9 +1,9 @@
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import axios from "axios";
 
-const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE!;
+const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || "AuthTokensTable";
 const REGION = process.env.AWS_REGION || "us-east-1";
-const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL!;
+const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
 const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
 const DISCORD_API_URL = "https://discord.com/api";

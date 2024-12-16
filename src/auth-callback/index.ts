@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { getDiscordIdFromToken, updateTokenData } from "src/auth-shared";
 
-const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL!;
+const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
 const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
 const ALLOWED_REDIRECT_URIS = (process.env.ALLOWED_REDIRECT_URIS || "").split(",");
