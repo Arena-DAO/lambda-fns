@@ -1,4 +1,5 @@
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import axios from "axios";
 
 const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || "AuthTokensTable";
@@ -143,6 +144,12 @@ export const getDiscordIdFromToken = async (token: string): Promise<string> => {
         console.error("Error fetching Discord ID:", error.response?.data || error.message);
         throw new Error("Failed to fetch Discord ID from the API.");
     }
+};
+
+export const getCallbackUrl = (event: APIGatewayProxyEvent): string => {
+    const domain = event.requestContext.domainName;
+    const stage = event.requestContext.stage;
+    return `https://${domain}/${stage}/callback`;
 };
 
 

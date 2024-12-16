@@ -1,51 +1,55 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { getCallbackUrl } from "src/auth-shared";
 
 const OAUTH2_AUTHORIZE_URL = process.env.OAUTH2_AUTHORIZE_URL || "https://discord.com/oauth2/authorize";
 const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 const OAUTH2_SCOPES = process.env.SCOPES!;
-const ALLOWED_REDIRECT_URIS = (process.env.ALLOWED_REDIRECT_URIS || "").split(",");
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         // Retrieve `state` and `redirect_uri` from query parameters
         const queryParams = event.queryStringParameters || {};
         const state = queryParams.state;
-        const redirectUri = queryParams.redirect_uri;
 
-        if (!state || !redirectUri) {
+        if (!state) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: "State and redirect_uri are required." }),
+                body: JSON.stringify({ error: "State parameter is required" }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store'
+                }
             };
         }
-
-        // Validate the provided `redirect_uri`
-        if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
-            console.error("Invalid redirect_uri:", redirectUri);
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: "Invalid redirect_uri." }),
-            };
-        }
-
         // Construct the authorization URL
         const authUrl = new URL(OAUTH2_AUTHORIZE_URL);
         authUrl.searchParams.append("client_id", OAUTH2_CLIENT_ID);
-        authUrl.searchParams.append("redirect_uri", redirectUri);
+        authUrl.searchParams.append("redirect_uri", getCallbackUrl(event));
         authUrl.searchParams.append("response_type", "code");
         authUrl.searchParams.append("scope", OAUTH2_SCOPES);
         authUrl.searchParams.append("state", state);
 
         return {
             statusCode: 302,
-            headers: { Location: authUrl.toString() },
-            body: "",
+            headers: {
+                'Location': authUrl.toString(),
+                'Cache-Control': 'no-store',
+                'Pragma': 'no-cache'
+            },
+            body: ""
         };
     } catch (error: any) {
         console.error("Error in auth-login handler:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: "Internal server error." }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store'
+            },
+            body: JSON.stringify({
+                error: "Internal server error",
+                message: error.message
+            })
         };
     }
 };
