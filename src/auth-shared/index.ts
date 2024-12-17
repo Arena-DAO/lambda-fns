@@ -1,8 +1,9 @@
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import axios from "axios";
+import { User } from "discord.js";
 
 const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || "AuthTokensTable";
-const REGION = process.env.AWS_REGION || "us-east-1";
+const REGION = process.env.AWS_REGION || "us-east-2";
 const DISCORD_API_URL = "https://discord.com/api";
 export const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
 export const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
@@ -127,7 +128,7 @@ export const updateTokenData = async (userId: string, accessToken: string, refre
  * @param token - The Bearer token from the Authorization header.
  * @returns The Discord ID of the user.
  */
-export const getDiscordIdFromToken = async (token: string): Promise<string> => {
+export const getDiscordProfileFromToken = async (token: string): Promise<User> => {
     try {
         const response = await axios.get(DISCORD_API_URL + "/users/@me", {
             headers: {
@@ -135,11 +136,11 @@ export const getDiscordIdFromToken = async (token: string): Promise<string> => {
             },
         });
 
-        if (!response.data || !response.data.id) {
+        if (!response.data || !response.data) {
             throw new Error("Failed to fetch Discord ID from the API.");
         }
 
-        return response.data.id;
+        return response.data;
     } catch (error: any) {
         console.error("Error fetching Discord ID:", error.response?.data || error.message);
         throw new Error("Failed to fetch Discord ID from the API.");

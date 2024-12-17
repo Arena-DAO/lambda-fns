@@ -2,7 +2,7 @@ import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { getDiscordIdFromToken, getValidAccessToken } from "src/auth-shared";
+import { getDiscordProfileFromToken, getValidAccessToken } from "src/auth-shared";
 
 const FAUCET_MNEMONIC = process.env.FAUCET_MNEMONIC;
 const RPC_ENDPOINT = process.env.RPC_ENDPOINT || "https://neutron-rpc.publicnode.com:443";
@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const token = await getValidAccessToken(authHeader.split(" ")[1]);
 
     // Query Discord API for Discord ID
-    const discordId = await getDiscordIdFromToken(token);
+    const profile = await getDiscordProfileFromToken(token);
 
     // Parse and validate request body
     if (!event.body) {
@@ -60,7 +60,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Step 2: Execute the smart contract method
     const msg = {
       set_profile: {
-        user_id: discordId,
+        user_id: profile.id,
+        avatar_hash: profile.avatar,
+        username: profile.username,
         addr: walletAddress,
       },
     };

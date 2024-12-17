@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { getDiscordIdFromToken, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, REDIRECT_URI, updateTokenData } from "src/auth-shared";
+import { getDiscordProfileFromToken, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, REDIRECT_URI, updateTokenData } from "src/auth-shared";
 
 const OAUTH2_TOKEN_URL = process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
 
@@ -41,24 +41,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
         // Get discord user id
-        const userId = await getDiscordIdFromToken(access_token);
+        const profile = await getDiscordProfileFromToken(access_token);
 
         // Store the tokens securely
         const expirationTime = Math.floor(Date.now() / 1000) + expires_in;
-        await updateTokenData(userId, access_token, refresh_token, expirationTime);
+        await updateTokenData(profile.id, access_token, refresh_token, expirationTime);
 
         return {
-            statusCode: 200,
+            statusCode: 302,
             headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-store'
+                'Location': `https://arenadao.org/oauth/callback?state=${state}`,
+                'Cache-Control': 'no-store',
             },
-            body: JSON.stringify({
-                success: true,
-                userId,
-                expiresIn: expires_in,
-                state
-            })
+            body: "",
         };
     } catch (error: any) {
         console.error("Error in auth-callback handler:", error);

@@ -22,5 +22,8 @@
     "esbuild-node-externals": "^1.15.0",
     "serverless": "4.4.16",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3"
   }
 }
