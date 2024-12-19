@@ -15,10 +15,10 @@ export const handler = async (
 	try {
 		// Retrieve `redirect_uri` and `wallet_address` (or other params) from query parameters
 		const queryParams = event.queryStringParameters || {};
-		const redirectUrl = queryParams.redirect_uri;
+		const redirectUri = queryParams.redirect_uri;
 		const walletAddress = queryParams.wallet_address;
 
-		if (!redirectUrl || !walletAddress) {
+		if (!redirectUri || !walletAddress) {
 			return {
 				statusCode: 400,
 				body: JSON.stringify({
@@ -33,7 +33,7 @@ export const handler = async (
 
 		// Construct the state object
 		const state = {
-			redirect_url: redirectUrl,
+			redirect_uri: redirectUri,
 			wallet_address: walletAddress,
 		};
 

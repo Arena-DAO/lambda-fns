@@ -22,7 +22,7 @@ export const SESSION_EXPIRATION_SECONDS = 86400; // 1 day
 const dynamoDbClient = new DynamoDBClient({ region: REGION });
 
 export type OAuth2State = {
-	redirect_url: string;
+	redirect_uri: string;
 	wallet_address: string;
 };
 
@@ -47,7 +47,7 @@ export function decodeOAuth2State(stateString: string): OAuth2State {
 		const state = JSON.parse(decoded) as OAuth2State;
 
 		// Validate the decoded state has the required properties
-		if (!state.redirect_url || !state.wallet_address) {
+		if (!state.redirect_uri || !state.wallet_address) {
 			throw new Error("Invalid state object structure");
 		}
 

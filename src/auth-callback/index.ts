@@ -73,7 +73,7 @@ export const handler = async (
 			statusCode: 302,
 			headers: {
 				"Set-Cookie": `sessionToken=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_EXPIRATION_SECONDS}`,
-				Location: `https://arenadao.org/oauth/callback?redirect_url=${encodeURIComponent(state.redirect_url)}`,
+				Location: `https://arenadao.org/oauth/callback?redirect_uri=${encodeURIComponent(state.redirect_uri)}`,
 				"Cache-Control": "no-store",
 			},
 			body: JSON.stringify({
