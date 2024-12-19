@@ -7,13 +7,12 @@
   "license": "GPL-3.0-only",
   "description": "Lambda functions to integrate Discord into the Arena DAO",
   "packageManager": "yarn@4.5.3",
-  "workspaces": [
-    "src/*"
-  ],
   "scripts": {
-    "build": "ts-node build.ts"
+    "build": "ts-node build.ts",
+    "lint": "biome check --write ./src/"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/aws-lambda": "^8.10.146",
     "@types/jsonwebtoken": "^9",
     "@types/node": "^22.10.2",
@@ -24,6 +23,10 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.714.0",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "axios": "^1.7.9",
     "discord.js": "^14.16.3"
   }
 }

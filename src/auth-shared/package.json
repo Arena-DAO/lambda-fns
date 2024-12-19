@@ -1,7 +1,0 @@
-{
-  "name": "auth-shared",
-  "packageManager": "yarn@4.5.3",
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.712.0"
-  }
-}

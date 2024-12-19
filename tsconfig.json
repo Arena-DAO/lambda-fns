@@ -1,33 +1,29 @@
 {
-    "compilerOptions": {
-        "target": "ES2020", // Ensure compatibility with Node.js 14/16/18 in Lambda
-        "module": "CommonJS", // Use CommonJS for Lambda compatibility
-        "lib": [
-            "ES2020"
-        ], // Match the target for included JS features
-        "strict": true, // Enable strict type-checking for safety
-        "esModuleInterop": true, // Ensure compatibility with ES Modules
-        "moduleResolution": "node", // Use Node.js-style module resolution
-        "baseUrl": ".", // Base directory for resolving non-relative paths
-        "paths": {
-            "@shared/*": [
-                "src/shared/*"
-            ] // Alias for shared utilities
-        },
-        "outDir": "dist", // Output directory for compiled files
-        "rootDir": "src", // Root directory of source files (set to "src" for clarity)
-        "declaration": true, // Generate .d.ts files for all source files
-        "declarationMap": true, // Include source maps for declarations
-        "sourceMap": true, // Enable source maps
-        "skipLibCheck": true, // Skip type checks for declaration files
-        "resolveJsonModule": true, // Allow importing JSON files
-        "forceConsistentCasingInFileNames": true // Enforce consistent file casing
-    },
-    "include": [
-        "src/**/*" // Include all files in the "src" folder
-    ],
-    "exclude": [
-        "node_modules",
-        "dist" // Exclude unnecessary folders
-    ]
+	"compilerOptions": {
+		"target": "ES2020", // Ensure compatibility with Node.js 14/16/18 in Lambda
+		"module": "CommonJS", // Use CommonJS for Lambda compatibility
+		"lib": ["ES2020"], // Match the target for included JS features
+		"strict": true, // Enable strict type-checking for safety
+		"esModuleInterop": true, // Ensure compatibility with ES Modules
+		"moduleResolution": "node", // Use Node.js-style module resolution
+		"baseUrl": ".", // Base directory for resolving non-relative paths
+		"paths": {
+			"@shared/*": ["src/shared/*"] // Alias for shared utilities
+		},
+		"outDir": "dist", // Output directory for compiled files
+		"rootDir": "src", // Root directory of source files (set to "src" for clarity)
+		"declaration": true, // Generate .d.ts files for all source files
+		"declarationMap": true, // Include source maps for declarations
+		"sourceMap": true, // Enable source maps
+		"skipLibCheck": true, // Skip type checks for declaration files
+		"resolveJsonModule": true, // Allow importing JSON files
+		"forceConsistentCasingInFileNames": true // Enforce consistent file casing
+	},
+	"include": [
+		"src/**/*" // Include all files in the "src" folder
+	],
+	"exclude": [
+		"node_modules",
+		"dist" // Exclude unnecessary folders
+	]
 }
