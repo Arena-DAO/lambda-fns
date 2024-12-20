@@ -27,6 +27,7 @@
     "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
     "axios": "^1.7.9",
+    "cookie": "^1.0.2",
     "discord.js": "^14.16.3"
   }
 }

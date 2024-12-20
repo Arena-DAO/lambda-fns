@@ -18,6 +18,7 @@ async function build() {
 		entryPoints: [
 			"src/auth-login/index.ts",
 			"src/auth-callback/index.ts",
+			"src/auth-logout/index.ts",
 		],
 		outdir: "dist",
 	});

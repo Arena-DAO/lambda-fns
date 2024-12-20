@@ -1767,6 +1767,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     aws-sdk: "npm:^2.1692.0"
     axios: "npm:^1.7.9"
+    cookie: "npm:^1.0.2"
     discord.js: "npm:^14.16.3"
     esbuild: "npm:^0.24.0"
     esbuild-node-externals: "npm:^1.15.0"
@@ -1952,6 +1953,13 @@ __metadata:
   dependencies:
     delayed-stream: "npm:~1.0.0"
   checksum: 10c0/0dbb829577e1b1e839fa82b40c07ffaf7de8a09b935cadd355a73652ae70a88b4320db322f6634a4ad93424292fa80973ac6480986247f1734a1137debf271d5
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "cookie@npm:1.0.2"
+  checksum: 10c0/fd25fe79e8fbcfcaf6aa61cd081c55d144eeeba755206c058682257cb38c4bd6795c6620de3f064c740695bb65b7949ebb1db7a95e4636efb8357a335ad3f54b
   languageName: node
   linkType: hard
 

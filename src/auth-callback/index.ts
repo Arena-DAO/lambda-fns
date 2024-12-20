@@ -4,15 +4,14 @@ import {
 	OAUTH2_CLIENT_ID,
 	OAUTH2_CLIENT_SECRET,
 	REDIRECT_URI,
-	SESSION_EXPIRATION_SECONDS,
-	createSession,
 	decodeOAuth2State,
+	updateTokens,
 } from "src/auth-shared";
-import { updateChainState } from "../auth-shared/neutron";
 import {
 	addGuildMember,
 	getDiscordProfileFromToken,
 } from "src/auth-shared/discord";
+import { updateChainState } from "../auth-shared/neutron";
 
 const OAUTH2_TOKEN_URL =
 	process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
@@ -62,12 +61,7 @@ export const handler = async (
 
 		// Store the tokens securely
 		const expirationTime = Math.floor(Date.now() / 1000) + expires_in;
-		const sessionToken = await createSession(
-			profile.id,
-			access_token,
-			refresh_token,
-			expirationTime,
-		);
+		await updateTokens(profile.id, access_token, refresh_token, expirationTime);
 
 		// Add the user to the DAO's discord
 		await addGuildMember(profile.id, access_token);
@@ -78,7 +72,7 @@ export const handler = async (
 		return {
 			statusCode: 302,
 			headers: {
-				"Set-Cookie": `sessionToken=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_EXPIRATION_SECONDS}`,
+				"Set-Cookie": `accessToken=${access_token}; Domain=.arenadao.org; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${expires_in}`,
 				Location: `https://arenadao.org/oauth/callback?redirect_uri=${encodeURIComponent(state.redirect_uri)}`,
 				"Cache-Control": "no-store",
 			},

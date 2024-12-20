@@ -1,21 +1,20 @@
 import { randomBytes } from "node:crypto";
 import {
+	DeleteItemCommand,
 	DynamoDBClient,
 	GetItemCommand,
 	UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import axios from "axios";
-import type { User } from "discord.js";
 import { decrypt, encrypt } from "./security";
 
-const DYNAMODB_TABLE = process.env.DYNAMODB_TABLE || "AuthTokensTable";
+const AUTH_TOKENS_TABLE = process.env.AUTH_TOKENS_TABLE || "AuthTokensTable";
 const REGION = process.env.AWS_REGION || "us-east-2";
 export const OAUTH2_TOKEN_URL =
 	process.env.OAUTH2_TOKEN_URL || "https://discord.com/api/oauth2/token";
 export const OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID!;
 export const OAUTH2_CLIENT_SECRET = process.env.OAUTH2_CLIENT_SECRET!;
 export const REDIRECT_URI = "https://api.arenadao.org/callback";
-export const SESSION_EXPIRATION_SECONDS = 86400; // 1 day
 
 const dynamoDbClient = new DynamoDBClient({ region: REGION });
 
@@ -58,20 +57,12 @@ export function decodeOAuth2State(stateString: string): OAuth2State {
 }
 
 /**
- * Generate a new session token.
- * @returns A secure session token.
- */
-const generateSessionToken = (): string => {
-	return randomBytes(32).toString("hex");
-};
-
-/**
  * Get a valid access token for the given user.
  * Refreshes the token if it is expired.
  * @param userId The ID of the user to retrieve the token for.
  * @returns A valid access token.
  */
-const getValidAccessToken = async (userId: string): Promise<string> => {
+export const getValidAccessToken = async (userId: string): Promise<string> => {
 	// Fetch token data from DynamoDB
 	const tokenData = await getTokenData(userId);
 
@@ -91,7 +82,7 @@ const getValidAccessToken = async (userId: string): Promise<string> => {
 	const newTokenData = await refreshAccessToken(refreshToken);
 
 	// Update DynamoDB with the new token data
-	await createSession(
+	await updateTokens(
 		userId,
 		newTokenData.accessToken,
 		newTokenData.refreshToken,
@@ -99,19 +90,6 @@ const getValidAccessToken = async (userId: string): Promise<string> => {
 	);
 
 	return newTokenData.accessToken;
-};
-
-export const getValidAccessTokenWithSession = async (
-	userId: string,
-	sessionToken: string,
-): Promise<string> => {
-	const isSessionValid = await validateAndRefreshSession(userId, sessionToken);
-
-	if (!isSessionValid) {
-		throw new Error("Session token is invalid or expired.");
-	}
-
-	return await getValidAccessToken(userId); // Use existing logic to get a valid access token
 };
 
 /**
@@ -158,21 +136,19 @@ const refreshAccessToken = async (
 };
 
 /**
- * Retrieve token and session data for a given user ID from DynamoDB.
+ * Retrieve token data for a given user ID from DynamoDB.
  * @param userId The ID of the user.
- * @returns The token and session data if found, or null.
+ * @returns The token data if found, or null.
  */
-const getTokenData = async (
+export const getTokenData = async (
 	userId: string,
 ): Promise<{
 	accessToken: string;
 	refreshToken: string;
 	expirationTime: number;
-	sessionToken: string;
-	sessionExpirationTime: number;
 } | null> => {
 	const command = new GetItemCommand({
-		TableName: DYNAMODB_TABLE,
+		TableName: AUTH_TOKENS_TABLE,
 		Key: { userId: { S: userId } },
 	});
 
@@ -188,11 +164,6 @@ const getTokenData = async (
 			accessToken: decrypt(response.Item.accessToken.S!),
 			refreshToken: decrypt(response.Item.refreshToken.S!),
 			expirationTime: Number.parseInt(response.Item.expirationTime.N!, 10),
-			sessionToken: decrypt(response.Item.sessionToken.S!),
-			sessionExpirationTime: Number.parseInt(
-				response.Item.sessionExpirationTime.N!,
-				10,
-			),
 		};
 	} catch (error: any) {
 		console.error("Error fetching token data:", error.message);
@@ -201,79 +172,52 @@ const getTokenData = async (
 };
 
 /**
- * Create a new session for a user in DynamoDB.
+ * Initialize or update tokens for a user in DynamoDB.
  * @param userId The ID of the user.
  * @param accessToken The access token.
  * @param refreshToken The refresh token.
  * @param expirationTime The expiration time of the access token.
  */
-export const createSession = async (
+export const updateTokens = async (
 	userId: string,
 	accessToken: string,
 	refreshToken: string,
 	expirationTime: number,
-): Promise<string> => {
-	const sessionToken = generateSessionToken();
-	const sessionExpirationTime =
-		Math.floor(Date.now() / 1000) + SESSION_EXPIRATION_SECONDS; // 1 day session expiry
-
+): Promise<void> => {
 	// Encrypt sensitive data
 	const encryptedAccessToken = encrypt(accessToken);
 	const encryptedRefreshToken = encrypt(refreshToken);
-	const encryptedSessionToken = encrypt(sessionToken);
 
 	const command = new UpdateItemCommand({
-		TableName: DYNAMODB_TABLE,
+		TableName: AUTH_TOKENS_TABLE,
 		Key: { userId: { S: userId } },
 		UpdateExpression:
-			"SET accessToken = :accessToken, refreshToken = :refreshToken, expirationTime = :expirationTime, sessionToken = :sessionToken, sessionExpirationTime = :sessionExpirationTime",
+			"SET accessToken = :accessToken, refreshToken = :refreshToken, expirationTime = :expirationTime",
 		ExpressionAttributeValues: {
 			":accessToken": { S: encryptedAccessToken },
 			":refreshToken": { S: encryptedRefreshToken },
 			":expirationTime": { N: expirationTime.toString() },
-			":sessionToken": { S: encryptedSessionToken },
-			":sessionExpirationTime": { N: sessionExpirationTime.toString() },
 		},
 	});
 
 	await dynamoDbClient.send(command);
-	return sessionToken;
 };
 
 /**
- * Validate and refresh a session token.
+ * Clear all auth data for a user in DynamoDB by deleting the entire entry.
  * @param userId The ID of the user.
- * @param sessionToken The session token to validate.
- * @returns True if the session is valid, otherwise false.
+ * @throws Error if clearing the data fails.
  */
-export const validateAndRefreshSession = async (
-	userId: string,
-	sessionToken: string,
-): Promise<boolean> => {
-	const tokenData = await getTokenData(userId);
+export const clearAuthData = async (userId: string): Promise<void> => {
+	try {
+		const command = new DeleteItemCommand({
+			TableName: AUTH_TOKENS_TABLE,
+			Key: { userId: { S: userId } },
+		});
 
-	if (!tokenData || tokenData.sessionToken !== sessionToken) {
-		return false;
+		await dynamoDbClient.send(command);
+	} catch (error) {
+		console.error("Error clearing auth data:", error);
+		throw new Error("Failed to clear authentication data");
 	}
-
-	const currentTime = Math.floor(Date.now() / 1000);
-
-	if (currentTime > tokenData.sessionExpirationTime) {
-		return false; // Session expired
-	}
-
-	// Refresh session expiration time (sliding expiry)
-	const newSessionExpirationTime = currentTime + SESSION_EXPIRATION_SECONDS; // Extend by 1 day
-
-	const command = new UpdateItemCommand({
-		TableName: DYNAMODB_TABLE,
-		Key: { userId: { S: userId } },
-		UpdateExpression: "SET sessionExpirationTime = :sessionExpirationTime",
-		ExpressionAttributeValues: {
-			":sessionExpirationTime": { N: newSessionExpirationTime.toString() },
-		},
-	});
-
-	await dynamoDbClient.send(command);
-	return true;
 };

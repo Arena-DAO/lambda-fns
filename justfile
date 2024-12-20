@@ -1,3 +1,5 @@
+endpoints := "auth-login auth-callback auth-logout"
+
 # Install dependencies for the project
 install:
     yarn install
@@ -14,13 +16,10 @@ clean:
 create-zip-dir:
     mkdir -p dist/zip
 
-# Package individual functions
-package-auth-login: create-zip-dir
-    cd dist/auth-login && zip -r ../zip/auth-login.zip index.js*
+# Package a single function
+package-fn fn:
+    cd dist/{{fn}} && zip -r ../zip/{{fn}}.zip index.js*
 
-package-auth-callback: create-zip-dir
-    cd dist/auth-callback && zip -r ../zip/auth-callback.zip index.js*
 # Package all functions
 package: build
-    just package-auth-login
-    just package-auth-callback
+    for fn in {{endpoints}}; do just package-fn ${fn}; done
