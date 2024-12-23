@@ -73,6 +73,12 @@ export const addGuildMember = async (
 			"Error adding guild member:",
 			error.response?.data || error.message,
 		);
+
+		if (error.response?.data?.code === 30001) {
+			// User is at max guilds of 100
+			return undefined;
+		}
+
 		throw new Error("Failed to add user to guild.");
 	}
 };
