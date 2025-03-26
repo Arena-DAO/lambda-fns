@@ -19,6 +19,7 @@ async function build() {
 			"src/auth-login/index.ts",
 			"src/auth-callback/index.ts",
 			"src/auth-logout/index.ts",
+			"src/image-upload/index.ts",
 		],
 		outdir: "dist",
 	});
