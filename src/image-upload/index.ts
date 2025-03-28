@@ -3,51 +3,42 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { S3Client } from "@aws-sdk/client-s3";
 
 export const handler = async (
-  event: APIGatewayProxyEvent,
+  _event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    // Check if event.body exists before parsing
-    if (!event.body) {
+    // Generate a unique key with a timestamp prefix
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const key = `uploads/${timestamp}-${randomString}`;
+    
+    // Check if BUCKET_NAME environment variable exists
+    if (!process.env.BUCKET_NAME) {
       return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing request body" }),
+        statusCode: 500,
+        body: JSON.stringify({ error: "Server configuration error: Missing bucket name" }),
       };
     }
     
-    const { fileType } = JSON.parse(event.body);
+    const s3Client = new S3Client({ region: "us-east-2" });
     
-    // Check that the file type is an image
-    if (!fileType.startsWith('image/')) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Only image files are allowed!" }),
-      };
-    }
-    
-    const fileExtension = fileType.split('/')[1];
-    const key = `uploads/${Date.now()}-${Math.random()}.${fileExtension}`;
-    
-    const postParams = {
+    // Create a presigned post URL with restrictions
+    const post = await createPresignedPost(s3Client, {
       Bucket: process.env.BUCKET_NAME,
-      Fields: {
-        key: key,
-        'Content-Type': fileType,
-      },
+      Key: key,
       Conditions: [
         // Restrict file size to 5MB max
         ["content-length-range", 0, 5242880],
-        // Ensure the Content-Type matches what we expect
-        ["eq", "$Content-Type", fileType]
+        // Only allow image content types
+        ["starts-with", "$Content-Type", "image/"]
       ],
-      Expires: 60
-    };
-    
-    const s3Client = new S3Client({ region : "us-east-2" });
-    const post = await createPresignedPost(s3Client, postParams);
+      Expires: 300 // 5 minutes expiration
+    });
     
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ 
         postData: post, 
         imageUrl: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}` 
