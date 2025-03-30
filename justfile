@@ -1,4 +1,4 @@
-endpoints := "auth-login auth-callback auth-logout"
+endpoints := "auth-login auth-callback auth-logout image-upload"
 
 # Install dependencies for the project
 install:
